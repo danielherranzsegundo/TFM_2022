@@ -1,0 +1,27 @@
+{
+    "PartyId": "50554d6e-29bb-11e5-b345-feff819cdc9e",
+    "PartyType": "Lore",
+    "Name": "Lorem",
+    "FullLegalName": "Lorem",
+    "LegalStructure": "Lorem",
+    "BeneficialOwnership": "Lorem",
+    "AccountRole": "Lorem",
+    "emailAddress": "Lorem",
+    "Phone": "Lorem",
+    "Address": [
+        {
+            "PartyId": "Lorem",
+            "AddressType": "Lorem",
+            "AddressLine": "Lorem",
+            "StreetName": "Lorem",
+            "TownName": "Lorem",
+            "BuildingNumber": "Lorem",
+            "PostCode": "Lorem",
+            "CountrySubDivision": "Lorem",
+            "Country_code": "Lorem",
+            "Country_ShortName": "Lorem",
+            "Country_Description": "Lorem"
+        }
+    ],
+    "Mobile": "Lorem"
+}

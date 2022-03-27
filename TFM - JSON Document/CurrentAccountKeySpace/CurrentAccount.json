@@ -1,0 +1,16 @@
+{
+    "PartyId": "Lorem",
+    "AccountId": "50554d6e-29bb-11e5-b345-feff819cdc9e",
+    "StatusUpdateDateTime": "2011-02-03 04:05:00+0000",
+    "AccountType": "Lorem",
+    "NickName": "Lorem",
+    "AccountInfo": [
+        {
+            "Name": "Lorem",
+            "Identification": "Lorem",
+            "SchemeName": "Lorem"
+        }
+    ],
+    "OpeningDate": "2011-02-03 04:05:00+0000",
+    "Status": "Lorem"
+}

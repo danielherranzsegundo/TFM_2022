@@ -1,0 +1,22 @@
+{
+    "CreditDebtIndicator": "Lorem",
+    "AccountId": "50554d6e-29bb-11e5-b345-feff819cdc9e",
+    "Type": "Lorem",
+    "CreditLine": {
+        "Included": "Lorem",
+        "Type": "Lorem",
+        "Currency": {
+            "Code": "EUR",
+            "Description": "Lorem"
+        },
+        "Amount": -7.077123594281925e+29
+    },
+    "Amount": {
+        "Amount": 1.1251905244166532e+30,
+        "Currency": {
+            "Code": "EUR",
+            "Description": "Lorem"
+        }
+    },
+    "DateTime": "2011-02-03 04:05:00+0000"
+}

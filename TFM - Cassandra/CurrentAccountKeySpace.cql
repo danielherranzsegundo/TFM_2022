@@ -7,13 +7,7 @@ AND DURABLE_WRITES = true;
 
 USE "CurrentAccountKeySpace";
 
-CREATE TYPE IF NOT EXISTS "CurrentAccountKeySpace".Currency (
-  "Code" text,
-  "Description" text
-);
-
 CREATE TYPE IF NOT EXISTS "CurrentAccountKeySpace".Address (
-  "PartyId" text,
   "AddressType" text,
   "AddressLine" text,
   "StreetName" text,
@@ -30,18 +24,6 @@ CREATE TYPE IF NOT EXISTS "CurrentAccountKeySpace".AccountInfo (
   "Name" text,
   "Identification" text,
   "SchemeName" text
-);
-
-CREATE TYPE IF NOT EXISTS "CurrentAccountKeySpace".Amount (
-  "Amount" double,
-  "Currency" frozen<Currency>
-);
-
-CREATE TYPE IF NOT EXISTS "CurrentAccountKeySpace".CreditLine (
-  "Included" text,
-  "Type" text,
-  "Currency" frozen<Currency>,
-  "Amount" double
 );
 
 CREATE TABLE "CurrentAccountKeySpace"."CurrentAccount" (

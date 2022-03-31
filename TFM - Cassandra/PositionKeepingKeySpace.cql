@@ -7,13 +7,7 @@ AND DURABLE_WRITES = true;
 
 USE "PositionKeepingKeySpace";
 
-CREATE TYPE IF NOT EXISTS "PositionKeepingKeySpace".Currency (
-  "Code" text,
-  "Description" text
-);
-
 CREATE TYPE IF NOT EXISTS "PositionKeepingKeySpace".Address (
-  "PartyId" text,
   "AddressType" text,
   "AddressLine" text,
   "StreetName" text,
@@ -32,24 +26,23 @@ CREATE TYPE IF NOT EXISTS "PositionKeepingKeySpace".AccountInfo (
   "SchemeName" text
 );
 
-CREATE TYPE IF NOT EXISTS "PositionKeepingKeySpace".Amount (
-  "Amount" double,
-  "Currency" frozen<Currency>
-);
-
-CREATE TYPE IF NOT EXISTS "PositionKeepingKeySpace".CreditLine (
-  "Included" text,
-  "Type" text,
-  "Currency" frozen<Currency>,
-  "Amount" double
-);
-
-CREATE TABLE "PositionKeepingKeySpace"."PositionKeepingKeySpace" (
+CREATE TABLE "PositionKeepingKeySpace"."PositionKeeping" (
   "CreditDebtIndicator" text,
-  "AccountId" uuid,
   "Type" text,
-  "CreditLine" frozen<CreditLine>,
-  "Amount" frozen<Amount>,
   "DateTime" timestamp,
-  PRIMARY KEY ("AccountId")
-);
+  "Amount_Amount" double,
+  "Amount_Currency_code" text,
+  "Amount_Currency_description" text,
+  "CreditLine_Type" text,
+  "AccountId" uuid,
+  "CreditLine_Included" boolean,
+  "Credit_Line_Amount" double,
+  "Credit_line_Currency_code " text,
+  PRIMARY KEY ("AccountId", "Amount_Currency_code", "Credit_line_Currency_code ")
+)
+WITH CLUSTERING ORDER BY ("Amount_Currency_code" ASC, "Credit_line_Currency_code " ASC);
+
+CREATE SEARCH INDEX ON "PositionKeepingKeySpace"."PositionKeeping"
+  WITH COLUMNS
+    "AccountId"
+  AND OPTIONS {reindex: false};

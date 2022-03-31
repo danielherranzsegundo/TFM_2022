@@ -7,13 +7,7 @@ AND DURABLE_WRITES = true;
 
 USE "CustomerProfileKeySpace";
 
-CREATE TYPE IF NOT EXISTS "CustomerProfileKeySpace".Currency (
-  "Code" text,
-  "Description" text
-);
-
 CREATE TYPE IF NOT EXISTS "CustomerProfileKeySpace".Address (
-  "PartyId" text,
   "AddressType" text,
   "AddressLine" text,
   "StreetName" text,
@@ -32,18 +26,6 @@ CREATE TYPE IF NOT EXISTS "CustomerProfileKeySpace".AccountInfo (
   "SchemeName" text
 );
 
-CREATE TYPE IF NOT EXISTS "CustomerProfileKeySpace".Amount (
-  "Amount" double,
-  "Currency" frozen<Currency>
-);
-
-CREATE TYPE IF NOT EXISTS "CustomerProfileKeySpace".CreditLine (
-  "Included" text,
-  "Type" text,
-  "Currency" frozen<Currency>,
-  "Amount" double
-);
-
 CREATE TABLE "CustomerProfileKeySpace"."CustomerProfile" (
   "PartyId" uuid,
   "PartyType" text,
@@ -58,3 +40,8 @@ CREATE TABLE "CustomerProfileKeySpace"."CustomerProfile" (
   "Mobile" text,
   PRIMARY KEY ("PartyId")
 );
+
+CREATE SEARCH INDEX ON "CustomerProfileKeySpace"."CustomerProfile"
+  WITH COLUMNS
+    "PartyId"
+  AND OPTIONS {reindex: false};

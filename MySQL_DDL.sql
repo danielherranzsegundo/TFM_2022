@@ -109,7 +109,7 @@ DROP TABLE IF EXISTS `PositionKeepingDomainSchema`.`Amount` ;
 CREATE TABLE IF NOT EXISTS `PositionKeepingDomainSchema`.`Amount` (
   `AmountId` BIGINT(10) NOT NULL AUTO_INCREMENT,
   `CurrencyId` INT NOT NULL,
-  `Amount` DOUBLE NOT NULL DEFAULT 0.0,
+  `Amount` DOUBLE NOT NULL,
   PRIMARY KEY (`AmountId`),
   INDEX `Amount_Currency_FK_idx` (`CurrencyId` ASC) VISIBLE,
   CONSTRAINT `Amount_Currency_FK`
@@ -211,7 +211,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `CustomerProfileDomainSchema`.`Address` ;
 
 CREATE TABLE IF NOT EXISTS `CustomerProfileDomainSchema`.`Address` (
-  `PartyId` BIGINT(10) NOT NULL,
+  `PartyId` BIGINT(10) NOT NULL ,
   `AddressType` VARCHAR(4) NULL,
   `AddressLine` VARCHAR(70) NULL,
   `StreetName` VARCHAR(70) NULL,
@@ -220,6 +220,7 @@ CREATE TABLE IF NOT EXISTS `CustomerProfileDomainSchema`.`Address` (
   `TownName` VARCHAR(45) NULL,
   `CountrySubDivision` VARCHAR(45) NULL,
   `CountryId` INT NOT NULL,
+  PRIMARY KEY (`PartyId`),
   INDEX `Country_Address_FK_idx` (`CountryId` ASC) VISIBLE,
   CONSTRAINT `Country_Address_FK`
     FOREIGN KEY (`CountryId`)

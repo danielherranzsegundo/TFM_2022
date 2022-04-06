@@ -1,0 +1,12 @@
+SELECT * 
+FROM CurrentAccountDomainSchema.CurrentAccount
+INNER JOIN CurrentAccountDomainSchema.CurrentAccount ON CustomerProfileDomainSchema.CustomerProfile.AccountID = CurrentAccountDomainSchema.CurrentAccount.AccountID
+INNER JOIN PositionKeepingDomainSchema.PositionKeeping ON CustomerProfileDomainSchema.CustomerProfile.AccountID = PositionKeepingDomainSchema.PositionKeeping.AccountID)
+INNER JOIN CustomerProfileDomainSchema.AccountInfo ON CurrentAccountDomainSchema.CurrentAccount.AccountID = CustomerProfileDomainSchema.AccountInfo.AccountID
+WHERE CustomerProfileDomainSchema.AccountInfo.SchemeName LIKE 'UK.%';
+ 
+SELECT AVG(column_name), SUM(column_name), MIN (column_name)
+FROM PositionKeepingDomainSchema.CreditLine
+INNER JOIN PositionKeepingDomainSchema.PositionKeeping ON PositionKeepingDomainSchema.CreditLine.CreditLineId = PositionKeepingDomainSchema.PositionKeeping.CreditLineId
+INNER JOIN PositionKeepingDomainSchema.Currency ON PositionKeepingDomainSchema.Currency.CurrencyId = PositionKeepingDomainSchema.CreditLine.CurrencyId
+WHERE PositionKeepingDomainSchema.Currency.Code = 'GBP';

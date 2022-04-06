@@ -1,0 +1,1 @@
+https://www.katacoda.com/datastax/courses/cassandra-ops-k8s/cassandra-ops-docker

@@ -51,7 +51,7 @@ USE `CurrentAccountDomainSchema` ;
 DROP TABLE IF EXISTS `CurrentAccountDomainSchema`.`CurrentAccount` ;
 
 CREATE TABLE IF NOT EXISTS `CurrentAccountDomainSchema`.`CurrentAccount` (
-  `AccountId` BIGINT(10) NOT NULL,
+  `AccountId` BIGINT(10),
   `PartyId` VARCHAR(45) NULL,
   `Status` VARCHAR(45) NULL,
   `StatusUpdateDateTime` TIMESTAMP(2) NULL,
@@ -211,7 +211,8 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `CustomerProfileDomainSchema`.`Address` ;
 
 CREATE TABLE IF NOT EXISTS `CustomerProfileDomainSchema`.`Address` (
-  `PartyId` BIGINT(10) NOT NULL ,
+  `AddressId` BIGINT(10) NOT NULL AUTO_INCREMENT,
+  `PartyId` BIGINT(10) NOT NULL,
   `AddressType` VARCHAR(4) NULL,
   `AddressLine` VARCHAR(70) NULL,
   `StreetName` VARCHAR(70) NULL,
@@ -220,7 +221,7 @@ CREATE TABLE IF NOT EXISTS `CustomerProfileDomainSchema`.`Address` (
   `TownName` VARCHAR(45) NULL,
   `CountrySubDivision` VARCHAR(45) NULL,
   `CountryId` INT NOT NULL,
-  PRIMARY KEY (`PartyId`),
+  PRIMARY KEY (`AddressId`),
   INDEX `Country_Address_FK_idx` (`CountryId` ASC) VISIBLE,
   CONSTRAINT `Country_Address_FK`
     FOREIGN KEY (`CountryId`)

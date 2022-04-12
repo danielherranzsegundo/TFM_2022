@@ -1,6 +1,6 @@
-https://www.mongodb.com/compatibility/deploying-a-mongodb-cluster-with-docker
+#https://www.mongodb.com/compatibility/deploying-a-mongodb-cluster-with-docker
 
-sudo -su root
+#sudo -su root
 
 docker network create mongoCluster
 
@@ -20,7 +20,6 @@ docker exec -it mongo1 mongosh --eval "rs.initiate({
 })"
 
 
-#Evaluar que todo es OK
 docker exec -it mongo1 mongosh --eval "rs.status()"
 
 #Pararlo todo:

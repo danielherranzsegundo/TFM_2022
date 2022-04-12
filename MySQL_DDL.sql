@@ -51,7 +51,7 @@ USE `CurrentAccountDomainSchema` ;
 DROP TABLE IF EXISTS `CurrentAccountDomainSchema`.`CurrentAccount` ;
 
 CREATE TABLE IF NOT EXISTS `CurrentAccountDomainSchema`.`CurrentAccount` (
-  `AccountId` BIGINT(10),
+  `AccountId` BIGINT(10) AUTO_INCREMENT,
   `PartyId` VARCHAR(45) NULL,
   `Status` VARCHAR(45) NULL,
   `StatusUpdateDateTime` TIMESTAMP(2) NULL,

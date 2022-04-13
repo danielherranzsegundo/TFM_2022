@@ -1,0 +1,49 @@
+UPDATE PositionKeepingDomainSchema.Amount a 
+INNER JOIN PositionKeepingDomainSchema.PositionKeeping pk ON pk.AmountId = a.AmountId
+INNER JOIN CurrentAccountDomainSchema.CurrentAccount ca ON ca.AccountId = pk.AccountId
+INNER JOIN CurrentAccountDomainSchema.AccountInfo ai ON ai.AccountId = ca.AccountId
+INNER JOIN CustomerProfileDomainSchema.CustomerProfile cp ON cp.PartyId = ca.PartyId
+INNER JOIN CustomerProfileDomainSchema.Address ad ON ad.PartyId = cp.PartyId
+INNER JOIN CustomerProfileDomainSchema.Country co ON co.CountryId = ad.CountryId
+SET a.CurrencyId = (SELECT CurrencyId FROM PositionKeepingDomainSchema.Currency WHERE Code = 'GBP')
+WHERE ca.Status = 'Enabled' 
+AND ai.SchemeName LIKE 'UK.%'
+AND ad.CountryId = (SELECT CountryId FROM CustomerProfileDomainSchema.Country WHERE Code = 'GBP');
+
+
+
+SELECT * FROM PositionKeepingDomainSchema.Amount a
+INNER JOIN PositionKeepingDomainSchema.PositionKeeping pk ON pk.AmountId = a.AmountId
+INNER JOIN CurrentAccountDomainSchema.CurrentAccount ca ON ca.AccountId = pk.AccountId
+INNER JOIN CurrentAccountDomainSchema.AccountInfo ai ON ai.AccountId = ca.AccountId
+INNER JOIN CustomerProfileDomainSchema.CustomerProfile cp ON cp.PartyId = ca.PartyId
+INNER JOIN CustomerProfileDomainSchema.Address ad ON ad.PartyId = cp.PartyId
+INNER JOIN CustomerProfileDomainSchema.Country co ON co.CountryId = ad.CountryId
+WHERE cp.PartyId = 10000;
+
+
+SELECT AVG(Amount),MIN(Amount),MAX(Amount) FROM PositionKeepingDomainSchema.Amount am
+INNER JOIN PositionKeepingDomainSchema.PositionKeeping pk ON pk.AmountId = am.AmountId
+INNER JOIN CurrentAccountDomainSchema.CurrentAccount ca ON ca.AccountId = pk.AccountId
+INNER JOIN CustomerProfileDomainSchema.CustomerProfile cp ON cp.PartyId = ca.PartyId
+INNER JOIN CurrentAccountDomainSchema.AccountInfo ai ON ai.AccountId = ca.AccountId
+INNER JOIN PositionKeepingDomainSchema.Currency cr ON cr.CurrencyId = am.CurrencyId
+WHERE cr.Code = 'ESP'
+AND cp.AccountRole = 'UK.OBIE.Principal'
+AND ai.SchemeName LIKE 'UK.%'
+
+
+
+DELETE PositionKeepingDomainSchema.PositionKeeping , CurrentAccountDomainSchema.CurrentAccount, CustomerProfileDomainSchema.CustomerProfile
+INNER JOIN CustomerProfileDomainSchema.CustomerProfile ON CurrentAccountDomainSchema.CurrentAccount.PartyId = CustomerProfileDomainSchema.CustomerProfile.PartyId
+INNER JOIN CurrentAccountDomainSchema.CurrentAccount ON CurrentAccountDomainSchema.CurrentAccount.PartyId = CustomerProfileDomainSchema.CustomerProfile.PartyId
+INNER JOIN PositionKeepingDomainSchema.PositionKeeping ON PositionKeepingDomainSchema.PositionKeeping.AccountId = CurrentAccountDomainSchema.CurrentAccount.PartyId
+WHERE cp.PartyId = 1;
+
+
+
+DELETE FROM CustomerProfileDomainSchema.CustomerProfile 
+ USING CustomerProfileDomainSchema.CustomerProfile JOIN CurrentAccountDomainSchema.CurrentAccount JOIN PositionKeepingDomainSchema.PositionKeeping
+ WHERE CustomerProfileDomainSchema.CustomerProfile.PartyId = CurrentAccountDomainSchema.CurrentAccount.PartyId
+   AND CurrentAccountDomainSchema.CurrentAccount.AccountId = PositionKeepingDomainSchema.PositionKeeping.AccountId
+   AND CustomerProfileDomainSchema.CustomerProfile.PartyId = 1

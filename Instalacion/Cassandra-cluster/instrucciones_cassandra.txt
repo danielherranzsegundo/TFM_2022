@@ -1,0 +1,22 @@
+docker run --name cas1 -p 9042:9042 -v /tfm/cassandra/data/node1:/var/lib/cassandra/data -e CASSANDRA_CLUSTER_NAME=MyCluster -e CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch -e CASSANDRA_DC=datacenter1 -d cassandra-tfm
+
+
+
+
+docker exec -it cas1  nodetool status
+
+docker run --name cas2 -v /tfm/cassandra/data/node2:/var/lib/cassandra/data -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' cas1)" -e CASSANDRA_CLUSTER_NAME=MyCluster -e CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch -e CASSANDRA_DC=datacenter1 -d cassandra-tfm
+
+docker run --name cas3 -v /tfm/cassandra/data/node3:/var/lib/cassandra/data -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' cas1)" -e CASSANDRA_CLUSTER_NAME=MyCluster -e CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch -e CASSANDRA_DC=datacenter1 -d cassandra-tfm
+
+
+
+Ejecutar carga 
+docker exec -it cas2  cqlsh
+
+describe keyspaces
+
+
+cambio en cassandra.yml sasi
+propio commit
+

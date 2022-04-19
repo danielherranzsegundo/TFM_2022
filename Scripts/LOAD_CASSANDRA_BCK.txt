@@ -1,0 +1,194 @@
+Script de medición y carga de las colecciones en cluster Cassandra
+TFM Daniel Herranz Segundo
+
+!pip install cassandra-driver
+!pip install install scales
+
+import pandas as pd
+import numpy as np
+import os
+import json
+import random
+from cassandra.cluster import Cluster
+from cassandra.auth import PlainTextAuthProvider
+import time
+from pprint import pprint
+import psutil
+import uuid
+
+def save_results_to_csv(results,file,consistencyLevel):
+    #Guardamos los resultados en csv
+    from datetime import datetime
+    dia = datetime.now().strftime("%d%m%Y_%H_%M_%S") 
+    data = results
+    results_df = pd.DataFrame(data, columns =['Registros', 'Tiempo', 'CPU','Memoria'])
+    results.to_csv(file.format(consistencyLevel, str(dia)))
+
+resultados_etl_CutomerProfileKeySpace = '../Results/Cassandra/MongoDB_Bulk_Insert_ConsistencyLevel_{}_CustomerProfile_{}.csv'
+resultados_etl_PositionKeepingKeySpace = '../Results/Cassandra/MongoDB_Bulk_Insert_ConsistencyLevel_{}_PositionKeeping_{}.csv'
+resultados_etl_CurrentAccountKeySpace = '../Results/Cassandra/MongoDB_Bulk_Insert_ConsistencyLevel_{}_CurrentAccount_{}.csv'
+
+#repeticiones
+repeats = 1000
+test_wc = False
+
+from cassandra.cluster import Cluster, ExecutionProfile, EXEC_PROFILE_DEFAULT
+from cassandra.policies import WhiteListRoundRobinPolicy, DowngradingConsistencyRetryPolicy
+from cassandra.query import tuple_factory
+from cassandra import ConsistencyLevel
+
+profile = ExecutionProfile(
+    load_balancing_policy=WhiteListRoundRobinPolicy(['127.0.0.1']),
+    retry_policy=DowngradingConsistencyRetryPolicy(),
+    consistency_level=ConsistencyLevel.LOCAL_QUORUM,
+    serial_consistency_level=ConsistencyLevel.LOCAL_SERIAL,
+    request_timeout=15,
+    row_factory=tuple_factory
+)
+cluster = Cluster(execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+session = cluster.connect()
+print(session.execute("SELECT release_version FROM system.local").one())
+
+session.execute('USE customerprofilekeyspace')
+
+rows = session.execute('SELECT * FROM customerprofile')
+
+for row in rows:
+    print(row)
+
+## Carga de los documentos por cada dominio
+
+CurrentAccountKeyspace_file_out = '../MockData/Cassandra/CurrentAccountKeyspace/CurrentAccountKeyspace.csv'
+CurrentAccountKeyspaceAccountInfo_file_out = '../MockData/Cassandra/CurrentAccountKeyspace/CurrentAccountAccountInfoKeyspace.csv'
+PositionKeepingKeyspace_file_out = '../MockData/Cassandra/PositionKeepingKeyspace/PositionKeepingKeyspace.csv'
+CustomerProfileKeyspace_file_out = '../MockData/Cassandra/CustomerProfileKeyspace/CustomerProfileKeyspace.csv'
+CustomerProfileAddressKeyspace_file_out = '../MockData/Cassandra/CustomerProfileKeyspace/CustomerProfileAddressKeyspace.csv'
+
+CurrentAccountKeyspace_sample_out = '../MockData/Cassandra/CurrentAccountKeyspace/CurrentAccountKeyspace_sample.csv'
+CurrentAccountKeyspaceAccountInfo_sample_out = '../MockData/Cassandra/CurrentAccountKeyspace/CurrentAccountAccountInfoKeyspace_sample.csv'
+PositionKeepingKeyspace_sample_out = '../MockData/Cassandra/PositionKeepingKeyspace/PositionKeepingKeyspace_sample.csv'
+CustomerProfileKeyspaceCustomer_sample_out = '../MockData/Cassandra/CustomerProfileKeyspace/CustomerProfileKeyspace_sample.csv'
+CustomerProfileKeyspaceAddress_sample_out = '../MockData/Cassandra/CustomerProfileKeyspace/CustomerProfileAddressKeyspace_sample.csv'
+
+### Test de carga CustomerProfileCollection
+
+#Carga de la información de dataframes por entidades
+CustomerProfileCollection_df = pd.read_csv(CustomerProfileKeyspaceCustomer_sample_out) #Carga Sample
+Address_df = pd.read_csv(CustomerProfileKeyspaceAddress_sample_out) #Carga Sample
+
+#CustomerProfileCollection_df = pd.read_json(CustomerProfileCollection_file_out) 
+#CurrentAccountCollection_df = pd.read_json(CurrentAccountCollection_file_out) 
+#PositionKeepingCollection_df = pd.read_json(PositionKeepingCollection_file_out) 
+
+print("CustomerProfileCollection_df",len(CustomerProfileCollection_df))
+print("Address_df",len(Address_df))
+
+for x in range(17): # Generamos un millon de registros aprox
+    CustomerProfileCollection_df = CustomerProfileCollection_df.append(CustomerProfileCollection_df.sample(frac=0.60,replace = True))
+
+for x in range(17):
+    Address_df = Address_df.append(Address_df.sample(frac=0.60,replace = True))
+
+
+print(len(CustomerProfileCollection_df))
+print(len(Address_df))
+
+num_documentos = 1000000
+
+CustomerProfileCollection_df = CustomerProfileCollection_df.sample(num_documentos)
+print(len(CustomerProfileCollection_df))
+CustomerProfileCollection_df.sample(1)
+
+Address_df = Address_df.sample(num_documentos)
+print(len(Address_df))
+Address_df.sample(1)
+
+sample_mode = True #En cargas masivas reales, poner a false
+
+if(sample_mode):
+    list_partyId = CustomerProfileCollection_df['PartyId'].map(lambda x: str(uuid.uuid1()))
+    CustomerProfileCollection_df['PartyId'] = list_partyId
+
+CustomerProfileCollection_df.sample(5)
+
+del(Address_df['PartyId'])
+Address_df.sample(5)
+
+import random
+
+def getRandomAddresList():
+    address_list = []
+    num_add = random.randint(1, 3)
+    for i in range(1,num_add):        
+        AddressSample = Address_df.sample(1);
+        tuple_add = (
+            str(AddressSample['AddressType']).replace("'",""),
+            str(AddressSample['AddressLine']).replace("'",""),
+            str(AddressSample['StreetName']).replace("'",""),
+            str(AddressSample['TownName']).replace("'",""),
+            str(AddressSample['BuildingNumber']).replace("'",""),
+            str(AddressSample['PostCode']).replace("'",""),
+            str(AddressSample['CountrySubDivision']).replace("'",""),
+            str(AddressSample['Country_Code']).replace("'",""),
+            str(AddressSample['Country_ShortName']).replace("'",""),
+            str(AddressSample['Country_Description']).replace("'","")
+        )
+        print(tuple_add)
+        address_list.append(tuple_add)    
+        
+    return address_list
+
+
+from cassandra import ConsistencyLevel
+from cassandra.query import SimpleStatement
+
+registers = []
+
+#Cargas Masiva con Many
+def loadCollectionDataFrame(df,keyspace):
+    session = cluster.connect(keyspace)
+    BATCH_SIZE = 1000
+    iter = 0;
+    i = 1
+    time_inicial = time.time()
+    for h,item in df.iterrows(): 
+        INSERT_STMT = """INSERT INTO CustomerProfile (partyid, partynumber, partytype, name, fulllegalname, legalstructure, beneficialownership, accountrole, emailaddress, phone, address) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', {});""".format(
+            item[0].replace("'",""),
+            item[1],
+            item[2].replace("'",""),
+            item[3].replace("'",""),
+            item[4].replace("'",""),
+            item[5].replace("'",""),
+            item[6],
+            item[7].replace("'",""),
+            item[8].replace("'",""),
+            item[9].replace("'",""),
+            getRandomAddresList()
+        )
+        query = SimpleStatement(INSERT_STMT, consistency_level=ConsistencyLevel.QUORUM)
+        #print(query)
+        session.execute(query)
+        
+                
+        if(i % BATCH_SIZE == 0 and i > 0):
+            ### FIN BATCH   
+            time_final = time.time()           
+            data_time_collection = round(time_final - time_inicial,3)
+            used_cpu = psutil.cpu_percent()
+            mem_used = psutil.virtual_memory().percent
+            registers.append((iter,data_time_collection,used_cpu,mem_used))
+            print("new register:", (iter,data_time_collection,used_cpu,mem_used))
+            iter += BATCH_SIZE;
+            time_inicial = time.time()
+        i = i + 1
+    return registers
+
+session.execute('TRUNCATE CustomerProfile;')
+
+registers = loadCollectionDataFrame(CustomerProfileCollection_df, 'customerprofilekeyspace')
+
+registers
+
+save_results_to_csv(registers,resultados_etl_CutomerProfileKeySpace, 'QUORUM')
+
+
